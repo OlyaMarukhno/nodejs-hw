@@ -4,12 +4,13 @@ import createHttpError from 'http-errors';
 export const getAllNotes = async (req, res, next) => {
   try {
     const { page = 1, perPage = 10, tag, search } = req.query;
+    const userId = req.user._id;
 
     const parsedPage = parseInt(page);
     const parsedPerPage = parseInt(perPage);
     const skip = (parsedPage - 1) * parsedPerPage;
 
-    const filter = {};
+    const filter = { userId }; // Шукаємо тільки нотатки цього користувача
 
     if (tag) {
       filter.tag = tag;
@@ -44,7 +45,9 @@ export const getAllNotes = async (req, res, next) => {
 export const getNoteById = async (req, res, next) => {
   try {
     const { noteId } = req.params;
-    const note = await Note.findById(noteId);
+    const userId = req.user._id;
+
+    const note = await Note.findOne({ _id: noteId, userId });
 
     if (!note) {
       throw createHttpError(404, 'Note not found');
@@ -58,7 +61,8 @@ export const getNoteById = async (req, res, next) => {
 
 export const createNote = async (req, res, next) => {
   try {
-    const note = await Note.create(req.body);
+    const userId = req.user._id;
+    const note = await Note.create({ ...req.body, userId });
 
     res.status(201).json(note);
   } catch (error) {
@@ -69,7 +73,9 @@ export const createNote = async (req, res, next) => {
 export const deleteNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
-    const note = await Note.findOneAndDelete({ _id: noteId });
+    const userId = req.user._id;
+
+    const note = await Note.findOneAndDelete({ _id: noteId, userId });
 
     if (!note) {
       throw createHttpError(404, 'Note not found');
@@ -84,7 +90,9 @@ export const deleteNote = async (req, res, next) => {
 export const updateNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
-    const note = await Note.findOneAndUpdate({ _id: noteId }, req.body, {
+    const userId = req.user._id;
+
+    const note = await Note.findOneAndUpdate({ _id: noteId, userId }, req.body, {
       returnDocument: 'after',
     });
 
