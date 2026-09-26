@@ -9,23 +9,34 @@ export const getAllNotes = async (req, res, next) => {
     const parsedPage = parseInt(page);
     const parsedPerPage = parseInt(perPage);
     const skip = (parsedPage - 1) * parsedPerPage;
-
-    const filter = { userId }; // Шукаємо тільки нотатки цього користувача
+    
+    const notesQuery = Note.find().where('userId').equals(userId);
 
     if (tag) {
-      filter.tag = tag;
+      notesQuery.where('tag').equals(tag);
     }
 
     if (search) {
-      filter.$or = [
+      notesQuery.or([
         { title: { $regex: search, $options: 'i' } },
         { content: { $regex: search, $options: 'i' } },
-      ];
+      ]);
+    }
+
+    const countQuery = Note.find().where('userId').equals(userId);
+    if (tag) {
+      countQuery.where('tag').equals(tag);
+    }
+    if (search) {
+      countQuery.or([
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+      ]);
     }
 
     const [notes, totalNotes] = await Promise.all([
-      Note.find(filter).skip(skip).limit(parsedPerPage),
-      Note.countDocuments(filter),
+      notesQuery.skip(skip).limit(parsedPerPage).exec(),
+      countQuery.countDocuments(),
     ]);
 
     const totalPages = Math.ceil(totalNotes / parsedPerPage);
