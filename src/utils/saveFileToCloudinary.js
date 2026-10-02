@@ -10,12 +10,23 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const saveFileToCloudinary = (fileBuffer) => {
+export const saveFileToCloudinary = (fileBuffer, userId) => {
   return new Promise((resolve, reject) => {
-    const stream = cloudinary.v2.uploader.upload_stream((error, result) => {
-      if (error) return reject(error);
-      resolve(result);
-    });
+    const options = {
+      resource_type: 'image',
+      folder: 'avatars',
+      public_id: `${userId}_avatar`,
+      overwrite: true,
+      unique_filename: false,
+    };
+
+    const stream = cloudinary.v2.uploader.upload_stream(
+      options,
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      },
+    );
 
     streamifier.createReadStream(fileBuffer).pipe(stream);
   });
