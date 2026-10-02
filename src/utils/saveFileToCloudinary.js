@@ -1,6 +1,6 @@
 import cloudinary from 'cloudinary';
 import dotenv from 'dotenv';
-import streamifier from 'node:streamifier';
+import streamifier from 'streamifier';
 
 dotenv.config();
 
