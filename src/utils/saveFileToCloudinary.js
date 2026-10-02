@@ -1,10 +1,10 @@
-import cloudinary from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
 import streamifier from 'streamifier';
 
 dotenv.config();
 
-cloudinary.v2.config({
+cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
@@ -20,7 +20,7 @@ export const saveFileToCloudinary = (fileBuffer, userId) => {
       unique_filename: false,
     };
 
-    const stream = cloudinary.v2.uploader.upload_stream(
+    const stream = cloudinary.uploader.upload_stream(
       options,
       (error, result) => {
         if (error) return reject(error);
